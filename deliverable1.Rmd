@@ -7,6 +7,86 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
 ```
 
 ## Introduction
+
+For this project I am looking to try and predict the likelihood of hospital patients getting heart disease. For this I am using a heart disease data set consisting of four hospital databases from Cleveland, Hungary, Switzerland, and VA Long Beach. The domain is the patients who's records are contained within this data set. I thought this would be an interesting topic because heath is something that is generally important to everyone and heart disease is the number one cause of death globally. The ability for early detection is important to those at risk of cardiovascular disease.
+
+## Data Set
+
+```{r data}
+heart <- read.csv("heart.csv")
+head(heart)
+```
+
+* `age` - `integer` - the age of the patient in years.
+* `sex` - `integer` - a categorical variable for the sex of the patient. (1 = male; 0 = female)
+* `cp` - `integer` - a categorical variable for chest pain type. (1 = typical angina; 2 = atypical angina; 3 = non-anginal pain; 4 = asymptomatic)
+* `trestbps` - `integer` - resting blood pressure (in mm Hg on admission to the hospital)
+* `chol` - `integer` - serum cholestoral in mg/dl
+* `fbs` - `integer` - categorical variable for fasting blood sugar > 120 mg/dl (1 = true; 0 = false)
+* `restecg` - `ordinal` - categorical variable for resting electrocardiographic results. (0 = normal; 1 = having ST-T wave abnormality; 2 = showing probable or definite left ventricular hypertrophy)
+* `thalach` - `integer` - maximum heart rate achieved
+* `exang` - `integer` - a categorical variable for exercise induced angina (1 = yes; 0 = no)
+* `oldpeak` - `double` - ST depression induced by exercise relative to rest
+* `slope` - `integer` - the slope of the peak exercise ST segment
+* `ca` - `integer` - number of major vessels (0-3) colored by flourosopy
+* `thal` - `integer` - 3 = normal; 6 = fixed defect; 7 = reversable defect
+* `target` - `integer` - diagnosis of heart disease (0 = no disease; 1 = disease)
+
+## Exploratory Data Analysis
+
+```{r eda}
+summary(heart)
+```
+
+Heathly vs Unheathy
+
+```{r eda0}
+ggplot(aes(target, group=target, fill=target), data=heart) +
+  geom_bar()
+```
+
+chol: Cholesterol in mg/dl
+
+```{r eda1}
+ggplot(aes(chol, group=target, fill=target), data=heart) +
+  geom_density(alpha = .7)
+```
+
+trestbps: Resting Blood Pressure
+
+```{r eda2}
+ggplot(aes(trestbps, group=target, fill=target), data=heart) +
+  geom_density(alpha = .7)
+```
+
+thalach: Maximum Heart Rate Achieved
+
+```{r eda3}
+ggplot(aes(thalach, group=target, fill=target), data=heart) +
+  geom_density(alpha = .7)
+```
+
+oldpeak: ST depression induced by exercise relative to rest
+
+```{r eda4}
+ggplot(aes(oldpeak, group=target, fill=target), data=heart) +
+  geom_density(alpha = .7)
+```
+
+cp: Chest Pain Experienced
+
+```{r eda5}
+ggplot(aes(cp, group=target, fill=target), data=heart) +
+  geom_bar(position = "dodge")
+```
+
+exang: Exercise Induced Angina
+
+```{r eda6}
+ggplot(aes(exang, group=target, fill=target), data=heart) +
+  geom_bar(position = "dodge")
+```

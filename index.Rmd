@@ -12,3 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Deliverable 1
 
 [Deliverable 1 Link](deliverable1.html)
+
+## Deliverable 2
+
+[Deliverable 2 Link](deliverable2.html)

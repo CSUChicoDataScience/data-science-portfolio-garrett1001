@@ -372,7 +372,7 @@ summary {
 
 <div id="predictions" class="section level2">
 <h2>Predictions</h2>
-<p>Based on my initial discovery and exploration I would like to predict the presence of heart disease in medical patients.</p>
+<p>Based upon my initial discovery and exploration I would like to predict the presence of heart disease in hospital patients from their medical data.</p>
 </div>
 <div id="success-and-failure" class="section level2">
 <h2>“Success” and “Failure”</h2>
@@ -380,48 +380,25 @@ summary {
 </div>
 <div id="new-data" class="section level2">
 <h2>New Data</h2>
-<p>My additional dataset is the “National Health Interview Survey (NHIS) - National Cardiovascular Disease Surveillance Data” published by the Centers for Disease Control and Prevention. The NHIS monitors the health of the nation through personal household interviews. This dataset is provided by the National Cardiovascular Disease Surveillance System, which is designed to integrate multiple indicators from many data sources to provide a comprehensive picture of the public health burden of CVDs and associated risk factors in the United States. This data is from 2001 and forward.</p>
+<p>My additional dataset is the “National Health Interview Survey (NHIS) - National Cardiovascular Disease Surveillance Data” published by the Centers for Disease Control and Prevention. The NHIS monitors the health of the nation through personal household interviews. This dataset is provided by the National Cardiovascular Disease Surveillance System, which is designed to integrate multiple indicators from many data sources to provide a comprehensive picture of the public health burden of CVDs and associated risk factors in the United States. This data is from 2001 and forward. This dataset should be useful for determining how different regions of the US affect the rate of cardiovascular disease within its different populations, as well as how different risk factors play into these rates. This new data will help me help me be able to make new and better predictions.</p>
 <pre class="r"><code>df &lt;- read.socrata(
   &quot;https://chronicdata.cdc.gov/resource/fwns-azgu.csv&quot;,
   app_token = &quot;OJxxBUd1kEfoUDA5ACIVnD88u&quot;
-) # API call
-
-#unique(df$indicator) # Add as description for topics
-#unique(df$data_value_type) # 2 comment on
-
-#unique(df$data_value_unit) # 1</code></pre>
+) # API call</code></pre>
 <p>Tidying Data:</p>
 <pre class="r"><code>NHIS &lt;- filter(df, !is.na(data_value), data_value_type == &quot;Age-Standardized&quot; | break_out_category == &quot;Age&quot;) %&gt;%
   select(year, locationdesc, category, topic, data_value, break_out_category, break_out) %&gt;%
-  rename(location = locationdesc, data_percent_value = data_value)
-
-#CardioDiseases &lt;- filter(NHIS, category == &quot;Cardiovascular Diseases&quot;) %&gt;%
+  rename(location = locationdesc, percent_value = data_value)</code></pre>
+<p>I first filtered the data to get rid of any NA values and any non-age-standardized data, that was not a part of the age break_out_category. Then I used select to get rid of the unneeded columns. Finally I renamed some columns to make it clear what they are.</p>
+<pre class="r"><code>#CardioDiseases &lt;- filter(NHIS, category == &quot;Cardiovascular Diseases&quot;) %&gt;%
 #  mutate(-category)
 #RiskFactors &lt;- filter(NHIS, category != &quot;Cardiovascular Diseases&quot;) %&gt;%
 #  mutate(-category)
 
-unique(NHIS$category) # 2</code></pre>
-<pre><code>## [1] &quot;Cardiovascular Diseases&quot; &quot;Risk Factors&quot;</code></pre>
-<pre class="r"><code>unique(NHIS$topic) # 7</code></pre>
-<pre><code>## [1] &quot;Major Cardiovascular Disease&quot;              
-## [2] &quot;Acute Myocardial Infarction (Heart Attack)&quot;
-## [3] &quot;Coronary Heart Disease&quot;                    
-## [4] &quot;Stroke&quot;                                    
-## [5] &quot;Physical Inactivity&quot;                       
-## [6] &quot;Smoking&quot;                                   
-## [7] &quot;Hypertension&quot;</code></pre>
-<pre class="r"><code>#unique(NHIS$break_out_category) # 4
-#unique(NHIS$break_out) # 14
-
-#test &lt;- NHIS %&gt;%
+#test &lt;- CardioDiseases %&gt;%
 #  pivot_wider(names_from = c(break_out_category, break_out),
 # values_from = data_value)</code></pre>
 <p>I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn’t find a nice way to tidy the data. I thought about splitting the data into multiple tables, but believe this would create many table and make working with the data more of a challenge. I will likely have to meet to figure out if it is possible to tidy.</p>
-<pre class="r"><code>heart &lt;- read.csv(&quot;heart.csv&quot;)
-heart$target[heart$target == 1] &lt;- &quot;Unhealthy&quot; # For clarification
-heart$target[heart$target == 0] &lt;- &quot;Healthy&quot;
-heart$sex[heart$sex == 1] &lt;- &quot;Male&quot;
-heart$sex[heart$sex == 0] &lt;- &quot;Female&quot;</code></pre>
 </div>
 <div id="tables" class="section level2">
 <h2>Tables</h2>
@@ -433,43 +410,172 @@ heart$sex[heart$sex == 0] &lt;- &quot;Female&quot;</code></pre>
 ## 4 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
 ## 5 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
 ## 6 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
-##   data_percent_value break_out_category break_out
-## 1                7.1            Overall   Overall
-## 2                8.6             Gender      Male
-## 3                5.8             Gender    Female
-## 4                1.2                Age     25-44
-## 5                8.0                Age     45-64
-## 6               24.5                Age       65+</code></pre>
+##   percent_value break_out_category break_out
+## 1           7.1            Overall   Overall
+## 2           8.6             Gender      Male
+## 3           5.8             Gender    Female
+## 4           1.2                Age     25-44
+## 5           8.0                Age     45-64
+## 6          24.5                Age       65+</code></pre>
 <ul>
 <li><code>year</code> - <code>integer</code> - year the data was collected.</li>
 <li><code>location</code> - <code>character</code> - categorical variable containing the region of the US that the data was collected. (United States; Northeast; Midwest; South; West)</li>
-<li><code>category</code> - <code>character</code> - categorical variable describing the the type of data (Cardiovascular Diseases, Risk Factor)</li>
-<li><code>topic</code> - <code>character</code> - categorical variable</li>
+<li><code>category</code> - <code>character</code> - variable describing the the category of the topic variable. (Cardiovascular Diseases, Risk Factor)</li>
+<li><code>topic</code> - <code>character</code> - categorical variable describing the topic that the percent_value corresponds to. (Major Cardiovascular Disease; Acute Myocardial Infarction (Heart Attack); Coronary Heart Disease; Stroke; Physical Inactivity; Smoking; Hypertension)</li>
+<li><code>percent_value</code> - <code>double</code> - the percent of the beak_out variable where topic variable is true. All values besides those that correspond to the “Age” break_out_category have been age-Standardized between different regions.</li>
+<li><code>break_out_category</code> - <code>character</code> - variable describing the category of the beak_out variable (Overall; Gender; Age; Race)</li>
+<li><code>break_out</code> - <code>character</code> - the group within the break_out_category that the percent_value corresponds to. (Overall; Male; Female; 25-44; 45-64; 65+; 35+; 75+; Non-Hispanic White; Non-Hispanic Black; Non-Hispanic Asian; Other)</li>
 </ul>
-<pre class="r"><code>head(heart)</code></pre>
-<pre><code>##   age    sex cp trestbps chol fbs restecg thalach exang oldpeak slope ca thal
-## 1  52   Male  0      125  212   0       1     168     0     1.0     2  2    3
-## 2  53   Male  0      140  203   1       0     155     1     3.1     0  0    3
-## 3  70   Male  0      145  174   0       1     125     1     2.6     0  0    3
-## 4  61   Male  0      148  203   0       1     161     0     0.0     2  1    3
-## 5  62 Female  0      138  294   1       1     106     0     1.9     1  3    2
-## 6  58 Female  0      100  248   0       0     122     0     1.0     1  0    2
-##      target
-## 1   Healthy
-## 2   Healthy
-## 3   Healthy
-## 4   Healthy
-## 5   Healthy
-## 6 Unhealthy</code></pre>
+<pre class="r"><code>Heart &lt;- read.csv(&quot;heart.csv&quot;)
+head(Heart)</code></pre>
+<pre><code>##   age sex cp trestbps chol fbs restecg thalach exang oldpeak slope ca thal
+## 1  52   1  0      125  212   0       1     168     0     1.0     2  2    3
+## 2  53   1  0      140  203   1       0     155     1     3.1     0  0    3
+## 3  70   1  0      145  174   0       1     125     1     2.6     0  0    3
+## 4  61   1  0      148  203   0       1     161     0     0.0     2  1    3
+## 5  62   0  0      138  294   1       1     106     0     1.9     1  3    2
+## 6  58   0  0      100  248   0       0     122     0     1.0     1  0    2
+##   target
+## 1      0
+## 2      0
+## 3      0
+## 4      0
+## 5      0
+## 6      1</code></pre>
 </div>
 <div id="simple-model" class="section level2">
 <h2>Simple Model</h2>
+<p>My main goal is to be able to predict the presents of heart disease in patients based on different risk factors. To do this I will use classification to determine if a patient belongs to the healthy heart group or the unhealthy group. I will use K-Nearest neighbors to do this classification.</p>
+<p>Model Version 1:</p>
+<pre class="r"><code>heart &lt;- as_tibble(Heart) %&gt;%
+  select(-target)
+
+set.seed(131)
+
+train_rows &lt;- as.vector(createDataPartition(Heart$target, p = 0.8, list = FALSE))
+## Split training and test dataset
+
+train &lt;- heart[train_rows, ]
+test &lt;- heart[-train_rows, ]
+train.def &lt;- Heart[train_rows, 14]
+test.def &lt;- Heart[-train_rows, 14]
+
+knn.3 &lt;- knn(train, test, train.def, k = 3)
+knn.5 &lt;- knn(train, test, train.def, k = 5)
+knn.7 &lt;- knn(train, test, train.def, k = 7)
+knn.15 &lt;- knn(train, test, train.def, k = 15)
+
+accuracy &lt;- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100} 
+## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
+
+tab.3 &lt;- table(knn.3, test.def)
+tab.3</code></pre>
+<pre><code>##      test.def
+## knn.3  0  1
+##     0 74 26
+##     1 19 86</code></pre>
+<pre class="r"><code>accuracy(tab.3)</code></pre>
+<pre><code>## [1] 78.04878</code></pre>
+<pre class="r"><code>## K = 3 correctly classifies 78.05% of the outcomes
+
+tab.5 &lt;- table(knn.5, test.def)
+tab.5</code></pre>
+<pre><code>##      test.def
+## knn.5  0  1
+##     0 70 31
+##     1 23 81</code></pre>
+<pre class="r"><code>accuracy(tab.5)</code></pre>
+<pre><code>## [1] 73.65854</code></pre>
+<pre class="r"><code>## K = 5 correctly classifies 73.66% of the outcomes
+
+tab.7 &lt;- table(knn.7, test.def)
+tab.7</code></pre>
+<pre><code>##      test.def
+## knn.7  0  1
+##     0 74 23
+##     1 19 89</code></pre>
+<pre class="r"><code>accuracy(tab.7)</code></pre>
+<pre><code>## [1] 79.5122</code></pre>
+<pre class="r"><code>## K = 7 correctly classifies 79.51% of the outcomes
+
+tab.15 &lt;- table(knn.15, test.def)
+tab.15</code></pre>
+<pre><code>##       test.def
+## knn.15  0  1
+##      0 75 23
+##      1 18 89</code></pre>
+<pre class="r"><code>accuracy(tab.15)</code></pre>
+<pre><code>## [1] 80</code></pre>
+<pre class="r"><code>## K = 15 correctly classifies 80% of the outcomes</code></pre>
+<p>Model Version 2:</p>
+<pre class="r"><code>heart &lt;- as_tibble(Heart) %&gt;%
+  select(-target, -ca, -trestbps)
+
+set.seed(131)
+
+train_rows &lt;- as.vector(createDataPartition(Heart$target, p = 0.8, list = FALSE))
+## Split training and test dataset
+
+train &lt;- heart[train_rows, ]
+test &lt;- heart[-train_rows, ]
+train.def &lt;- Heart[train_rows, 14]
+test.def &lt;- Heart[-train_rows, 14]
+
+knn.3 &lt;- knn(train, test, train.def, k = 3)
+knn.5 &lt;- knn(train, test, train.def, k = 5)
+knn.7 &lt;- knn(train, test, train.def, k = 7)
+knn.15 &lt;- knn(train, test, train.def, k = 15)
+
+accuracy &lt;- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100} 
+## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
+
+tab.3 &lt;- table(knn.3, test.def)
+tab.3</code></pre>
+<pre><code>##      test.def
+## knn.3  0  1
+##     0 75 26
+##     1 18 86</code></pre>
+<pre class="r"><code>accuracy(tab.3)</code></pre>
+<pre><code>## [1] 78.53659</code></pre>
+<pre class="r"><code>## K = 3 correctly classifies 78.54% of the outcomes
+
+tab.5 &lt;- table(knn.5, test.def)
+tab.5</code></pre>
+<pre><code>##      test.def
+## knn.5  0  1
+##     0 77 30
+##     1 16 82</code></pre>
+<pre class="r"><code>accuracy(tab.5)</code></pre>
+<pre><code>## [1] 77.56098</code></pre>
+<pre class="r"><code>## K = 5 correctly classifies 77.56% of the outcomes
+
+tab.7 &lt;- table(knn.7, test.def)
+tab.7</code></pre>
+<pre><code>##      test.def
+## knn.7  0  1
+##     0 75 20
+##     1 18 92</code></pre>
+<pre class="r"><code>accuracy(tab.7)</code></pre>
+<pre><code>## [1] 81.46341</code></pre>
+<pre class="r"><code>## K = 7 correctly classifies 81.46% of the outcomes
+
+tab.15 &lt;- table(knn.15, test.def)
+tab.15</code></pre>
+<pre><code>##       test.def
+## knn.15  0  1
+##      0 78 24
+##      1 15 88</code></pre>
+<pre class="r"><code>accuracy(tab.15)</code></pre>
+<pre><code>## [1] 80.97561</code></pre>
+<pre class="r"><code>## K = 15 correctly classifies 80.98% of the outcomes</code></pre>
 </div>
 <div id="parameters-and-output" class="section level2">
 <h2>Parameters and Output</h2>
+<p>In the first version of my model, my parameters were all variables except the target and my best output was 80% accuracy. I choose to use all variables because the variable provided in the dataset are a collection of some of the best indicators of heart diseases, so it would make sense to use them all. The percent of success was a bit lower then I hoped for, so I decided to try another version where I removed some variables based on my data exploration from the first deliverable. For this version I removed the variables ‘ca’ and ‘trestbps’ from my parameters. The reason I removed ‘trestbps’ or resting blood pressure was because the distribution between the two groups in my first deliverable was very similar. This seemed to improve my model raising my best output to 81.46% accuracy. The biggest limitation to this model is my lack of knowledge and experience using k nearest neighbor, for example I am unsure how I could create a visualization for this algorithm.</p>
 </div>
 <div id="social-and-ethical-implications" class="section level2">
 <h2>Social and Ethical Implications</h2>
+<p>A positive social impact of this model is to reduce possible deaths on a global scale, since heart disease is the number one cause of death world wide. One possible ethical impact is the possibility of this model being used by companies such as private health insurance companies to determine whether or not to cover or raise prices on individuals who may be at risk of heart disease.</p>
 </div>
 
 

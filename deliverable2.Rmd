@@ -9,11 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(RSocrata)
 library(tidyverse)
+library(modelr)
+library(caret)
+library(class)
 ```
 
 ## Predictions
 
-Based on my initial discovery and exploration I would like to predict the presence of heart disease in medical patients.
+Based upon my initial discovery and exploration I would like to predict the presence of heart disease in hospital patients from their medical data.
 
 ## "Success" and "Failure"
 
@@ -36,26 +39,22 @@ Tidying Data:
 NHIS <- filter(df, !is.na(data_value), data_value_type == "Age-Standardized" | break_out_category == "Age") %>%
   select(year, locationdesc, category, topic, data_value, break_out_category, break_out) %>%
   rename(location = locationdesc, percent_value = data_value)
+```
 
+I first filtered the data to get rid of any NA values and any non-age-standardized data, that was not a part of the age break_out_category. Then I used select to get rid of the unneeded columns. Finally I renamed some columns to make it clear what they are.
+
+```{r}
 #CardioDiseases <- filter(NHIS, category == "Cardiovascular Diseases") %>%
 #  mutate(-category)
 #RiskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
 #  mutate(-category)
 
-#test <- NHIS %>%
+#test <- CardioDiseases %>%
 #  pivot_wider(names_from = c(break_out_category, break_out),
 # values_from = data_value)
 ```
 
 I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn't find a nice way to tidy the data. I thought about splitting the data into multiple tables, but believe this would create many table and make working with the data more of a challenge. I will likely have to meet to figure out if it is possible to tidy.
-
-```{r}
-heart <- read.csv("heart.csv")
-heart$target[heart$target == 1] <- "Unhealthy" # For clarification
-heart$target[heart$target == 0] <- "Healthy"
-heart$sex[heart$sex == 1] <- "Male"
-heart$sex[heart$sex == 0] <- "Female"
-```
 
 ## Tables
 
@@ -72,11 +71,106 @@ head(NHIS)
 * `break_out` - `character` - the group within the break_out_category that the percent_value corresponds to. (Overall; Male; Female; 25-44; 45-64; 65+; 35+; 75+; Non-Hispanic White; Non-Hispanic Black; Non-Hispanic Asian; Other)
 
 ```{r}
-head(heart)
+Heart <- read.csv("heart.csv")
+head(Heart)
 ```
 
 ## Simple Model
 
+My main goal is to be able to predict the presents of heart disease in patients based on different risk factors. To do this I will use classification to determine if a patient belongs to the healthy heart group or the unhealthy group. I will use K-Nearest neighbors to do this classification.
+
+Model Version 1:
+```{r}
+heart <- as_tibble(Heart) %>%
+  select(-target)
+
+set.seed(131)
+
+train_rows <- as.vector(createDataPartition(Heart$target, p = 0.8, list = FALSE))
+## Split training and test dataset
+
+train <- heart[train_rows, ]
+test <- heart[-train_rows, ]
+train.def <- Heart[train_rows, 14]
+test.def <- Heart[-train_rows, 14]
+
+knn.3 <- knn(train, test, train.def, k = 3)
+knn.5 <- knn(train, test, train.def, k = 5)
+knn.7 <- knn(train, test, train.def, k = 7)
+knn.15 <- knn(train, test, train.def, k = 15)
+
+accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100} 
+## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
+
+tab.3 <- table(knn.3, test.def)
+tab.3
+accuracy(tab.3)
+## K = 3 correctly classifies 78.05% of the outcomes
+
+tab.5 <- table(knn.5, test.def)
+tab.5
+accuracy(tab.5)
+## K = 5 correctly classifies 73.66% of the outcomes
+
+tab.7 <- table(knn.7, test.def)
+tab.7
+accuracy(tab.7)
+## K = 7 correctly classifies 79.51% of the outcomes
+
+tab.15 <- table(knn.15, test.def)
+tab.15
+accuracy(tab.15)
+## K = 15 correctly classifies 80% of the outcomes
+```
+
+Model Version 2:
+```{r}
+heart <- as_tibble(Heart) %>%
+  select(-target, -ca, -trestbps)
+
+set.seed(131)
+
+train_rows <- as.vector(createDataPartition(Heart$target, p = 0.8, list = FALSE))
+## Split training and test dataset
+
+train <- heart[train_rows, ]
+test <- heart[-train_rows, ]
+train.def <- Heart[train_rows, 14]
+test.def <- Heart[-train_rows, 14]
+
+knn.3 <- knn(train, test, train.def, k = 3)
+knn.5 <- knn(train, test, train.def, k = 5)
+knn.7 <- knn(train, test, train.def, k = 7)
+knn.15 <- knn(train, test, train.def, k = 15)
+
+accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100} 
+## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
+
+tab.3 <- table(knn.3, test.def)
+tab.3
+accuracy(tab.3)
+## K = 3 correctly classifies 78.54% of the outcomes
+
+tab.5 <- table(knn.5, test.def)
+tab.5
+accuracy(tab.5)
+## K = 5 correctly classifies 77.56% of the outcomes
+
+tab.7 <- table(knn.7, test.def)
+tab.7
+accuracy(tab.7)
+## K = 7 correctly classifies 81.46% of the outcomes
+
+tab.15 <- table(knn.15, test.def)
+tab.15
+accuracy(tab.15)
+## K = 15 correctly classifies 80.98% of the outcomes
+```
+
 ## Parameters and Output
 
+In the first version of my model, my parameters were all variables except the target and my best output was 80% accuracy. I choose to use all variables because the variable provided in the dataset are a collection of some of the best indicators of heart diseases, so it would make sense to use them all. The percent of success was a bit lower then I hoped for, so I decided to try another version where I removed some variables based on my data exploration from the first deliverable. For this version I removed the variables 'ca' and 'trestbps' from my parameters. The reason I removed 'trestbps' or resting blood pressure was because the distribution between the two groups in my first deliverable was very similar. This seemed to improve my model raising my best output to 81.46% accuracy. The biggest limitation to this model is my lack of knowledge and experience using k nearest neighbor, for example I am unsure how I could create a visualization for this algorithm.
+
 ## Social and Ethical Implications
+
+A positive social impact of this model is to reduce possible deaths on a global scale, since heart disease is the number one cause of death world wide. One possible ethical impact is the possibility of this model being used by companies such as private health insurance companies to determine whether or not to cover or raise prices on individuals who may be at risk of heart disease.

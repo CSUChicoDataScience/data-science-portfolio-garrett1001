@@ -372,15 +372,95 @@ summary {
 
 <div id="predictions" class="section level2">
 <h2>Predictions</h2>
+<p>Based on my initial discovery and exploration I would like to predict the presence of heart disease in medical patients.</p>
 </div>
 <div id="success-and-failure" class="section level2">
 <h2>“Success” and “Failure”</h2>
+<p>For the predictions I am trying to make “Success” would be creating a model that accurately predicts the target variable or the presence of heart disease in a patient. “Failure” would be if my model was unable to accurately predict this.</p>
 </div>
 <div id="new-data" class="section level2">
 <h2>New Data</h2>
+<p>My additional dataset is the “National Health Interview Survey (NHIS) - National Cardiovascular Disease Surveillance Data” published by the Centers for Disease Control and Prevention. The NHIS monitors the health of the nation through personal household interviews. This dataset is provided by the National Cardiovascular Disease Surveillance System, which is designed to integrate multiple indicators from many data sources to provide a comprehensive picture of the public health burden of CVDs and associated risk factors in the United States. This data is from 2001 and forward.</p>
+<pre class="r"><code>df &lt;- read.socrata(
+  &quot;https://chronicdata.cdc.gov/resource/fwns-azgu.csv&quot;,
+  app_token = &quot;OJxxBUd1kEfoUDA5ACIVnD88u&quot;
+) # API call
+
+#unique(df$indicator) # Add as description for topics
+#unique(df$data_value_type) # 2 comment on
+
+#unique(df$data_value_unit) # 1</code></pre>
+<p>Tidying Data:</p>
+<pre class="r"><code>NHIS &lt;- filter(df, !is.na(data_value), data_value_type == &quot;Age-Standardized&quot; | break_out_category == &quot;Age&quot;) %&gt;%
+  select(year, locationdesc, category, topic, data_value, break_out_category, break_out) %&gt;%
+  rename(location = locationdesc, data_percent_value = data_value)
+
+#CardioDiseases &lt;- filter(NHIS, category == &quot;Cardiovascular Diseases&quot;) %&gt;%
+#  mutate(-category)
+#RiskFactors &lt;- filter(NHIS, category != &quot;Cardiovascular Diseases&quot;) %&gt;%
+#  mutate(-category)
+
+unique(NHIS$category) # 2</code></pre>
+<pre><code>## [1] &quot;Cardiovascular Diseases&quot; &quot;Risk Factors&quot;</code></pre>
+<pre class="r"><code>unique(NHIS$topic) # 7</code></pre>
+<pre><code>## [1] &quot;Major Cardiovascular Disease&quot;              
+## [2] &quot;Acute Myocardial Infarction (Heart Attack)&quot;
+## [3] &quot;Coronary Heart Disease&quot;                    
+## [4] &quot;Stroke&quot;                                    
+## [5] &quot;Physical Inactivity&quot;                       
+## [6] &quot;Smoking&quot;                                   
+## [7] &quot;Hypertension&quot;</code></pre>
+<pre class="r"><code>#unique(NHIS$break_out_category) # 4
+#unique(NHIS$break_out) # 14
+
+#test &lt;- NHIS %&gt;%
+#  pivot_wider(names_from = c(break_out_category, break_out),
+# values_from = data_value)</code></pre>
+<p>I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn’t find a nice way to tidy the data. I thought about splitting the data into multiple tables, but believe this would create many table and make working with the data more of a challenge. I will likely have to meet to figure out if it is possible to tidy.</p>
+<pre class="r"><code>heart &lt;- read.csv(&quot;heart.csv&quot;)
+heart$target[heart$target == 1] &lt;- &quot;Unhealthy&quot; # For clarification
+heart$target[heart$target == 0] &lt;- &quot;Healthy&quot;
+heart$sex[heart$sex == 1] &lt;- &quot;Male&quot;
+heart$sex[heart$sex == 0] &lt;- &quot;Female&quot;</code></pre>
 </div>
 <div id="tables" class="section level2">
 <h2>Tables</h2>
+<pre class="r"><code>head(NHIS)</code></pre>
+<pre><code>##   year      location                category                        topic
+## 1 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
+## 2 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
+## 3 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
+## 4 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
+## 5 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
+## 6 2000 United States Cardiovascular Diseases Major Cardiovascular Disease
+##   data_percent_value break_out_category break_out
+## 1                7.1            Overall   Overall
+## 2                8.6             Gender      Male
+## 3                5.8             Gender    Female
+## 4                1.2                Age     25-44
+## 5                8.0                Age     45-64
+## 6               24.5                Age       65+</code></pre>
+<ul>
+<li><code>year</code> - <code>integer</code> - year the data was collected.</li>
+<li><code>location</code> - <code>character</code> - categorical variable containing the region of the US that the data was collected. (United States; Northeast; Midwest; South; West)</li>
+<li><code>category</code> - <code>character</code> - categorical variable describing the the type of data (Cardiovascular Diseases, Risk Factor)</li>
+<li><code>topic</code> - <code>character</code> - categorical variable</li>
+</ul>
+<pre class="r"><code>head(heart)</code></pre>
+<pre><code>##   age    sex cp trestbps chol fbs restecg thalach exang oldpeak slope ca thal
+## 1  52   Male  0      125  212   0       1     168     0     1.0     2  2    3
+## 2  53   Male  0      140  203   1       0     155     1     3.1     0  0    3
+## 3  70   Male  0      145  174   0       1     125     1     2.6     0  0    3
+## 4  61   Male  0      148  203   0       1     161     0     0.0     2  1    3
+## 5  62 Female  0      138  294   1       1     106     0     1.9     1  3    2
+## 6  58 Female  0      100  248   0       0     122     0     1.0     1  0    2
+##      target
+## 1   Healthy
+## 2   Healthy
+## 3   Healthy
+## 4   Healthy
+## 5   Healthy
+## 6 Unhealthy</code></pre>
 </div>
 <div id="simple-model" class="section level2">
 <h2>Simple Model</h2>

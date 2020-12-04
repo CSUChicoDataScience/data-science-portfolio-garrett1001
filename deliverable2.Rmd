@@ -7,15 +7,73 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(RSocrata)
+library(tidyverse)
 ```
 
 ## Predictions
 
+Based on my initial discovery and exploration I would like to predict the presence of heart disease in medical patients.
+
 ## "Success" and "Failure"
+
+For the predictions I am trying to make "Success" would be creating a model that accurately predicts the target variable or the presence of heart disease in a patient. "Failure" would be if my model was unable to accurately predict this.
 
 ## New Data
 
+My additional dataset is the "National Health Interview Survey (NHIS) - National Cardiovascular Disease Surveillance Data" published by the Centers for Disease Control and Prevention. The NHIS monitors the health of the nation through personal household interviews. This dataset is provided by the National Cardiovascular Disease Surveillance System, which is designed to integrate multiple indicators from many data sources to provide a comprehensive picture of the public health burden of CVDs and associated risk factors in the United States. This data is from 2001 and forward. This dataset should be useful for determining how different regions of the US affect the rate of cardiovascular disease within its different populations, as well as how different risk factors play into these rates. This new data will help me help me be able to make new and better predictions.
+
+```{r}
+df <- read.socrata(
+  "https://chronicdata.cdc.gov/resource/fwns-azgu.csv",
+  app_token = "OJxxBUd1kEfoUDA5ACIVnD88u"
+) # API call
+```
+
+Tidying Data:
+
+```{r}
+NHIS <- filter(df, !is.na(data_value), data_value_type == "Age-Standardized" | break_out_category == "Age") %>%
+  select(year, locationdesc, category, topic, data_value, break_out_category, break_out) %>%
+  rename(location = locationdesc, percent_value = data_value)
+
+#CardioDiseases <- filter(NHIS, category == "Cardiovascular Diseases") %>%
+#  mutate(-category)
+#RiskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
+#  mutate(-category)
+
+#test <- NHIS %>%
+#  pivot_wider(names_from = c(break_out_category, break_out),
+# values_from = data_value)
+```
+
+I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn't find a nice way to tidy the data. I thought about splitting the data into multiple tables, but believe this would create many table and make working with the data more of a challenge. I will likely have to meet to figure out if it is possible to tidy.
+
+```{r}
+heart <- read.csv("heart.csv")
+heart$target[heart$target == 1] <- "Unhealthy" # For clarification
+heart$target[heart$target == 0] <- "Healthy"
+heart$sex[heart$sex == 1] <- "Male"
+heart$sex[heart$sex == 0] <- "Female"
+```
+
 ## Tables
+
+```{r}
+head(NHIS)
+```
+
+* `year` - `integer` - year the data was collected.
+* `location` - `character` - categorical variable containing the region of the US that the data was collected. (United States; Northeast; Midwest; South; West)
+* `category` - `character` - variable describing the the category of the topic variable. (Cardiovascular Diseases, Risk Factor)
+* `topic` - `character` - categorical variable describing the topic that the percent_value corresponds to. (Major Cardiovascular Disease; Acute Myocardial Infarction (Heart Attack); Coronary Heart Disease; Stroke; Physical Inactivity; Smoking; Hypertension)
+* `percent_value` - `double` - the percent of the beak_out variable where topic variable is true. All values besides those that correspond to the "Age" break_out_category have been age-Standardized between different regions.
+* `break_out_category` - `character` - variable describing the category of the beak_out variable (Overall; Gender; Age; Race)
+* `break_out` - `character` - the group within the break_out_category that the percent_value corresponds to. (Overall; Male; Female; 25-44; 45-64; 65+; 35+; 75+; Non-Hispanic White; Non-Hispanic Black; Non-Hispanic Asian; Other)
+
+```{r}
+head(heart)
+```
 
 ## Simple Model
 

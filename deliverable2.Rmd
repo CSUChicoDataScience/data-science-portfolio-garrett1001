@@ -20,7 +20,7 @@ Based upon my initial discovery and exploration I would like to predict the pres
 
 ## "Success" and "Failure"
 
-For the predictions I am trying to make "Success" would be creating a model that accurately predicts the target variable or the presence of heart disease in a patient. "Failure" would be if my model was unable to accurately predict this.
+For the predictions I am trying to make "Success" would be creating a model that accurately predicts the target variable or the presence of heart disease in a patient with more than 70%. "Failure" would be if my model was unable to accurately predict this.
 
 ## New Data
 
@@ -44,14 +44,45 @@ NHIS <- filter(df, !is.na(data_value), data_value_type == "Age-Standardized" | b
 I first filtered the data to get rid of any NA values and any non-age-standardized data, that was not a part of the age break_out_category. Then I used select to get rid of the unneeded columns. Finally I renamed some columns to make it clear what they are.
 
 ```{r}
-#CardioDiseases <- filter(NHIS, category == "Cardiovascular Diseases") %>%
-#  mutate(-category)
-#RiskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
-#  mutate(-category)
+cardioDiseases <- filter(NHIS, category == "Cardiovascular Diseases") %>%
+  select(-category)
 
-#test <- CardioDiseases %>%
-#  pivot_wider(names_from = c(break_out_category, break_out),
-# values_from = data_value)
+riskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
+  select(-category)
+
+head(cardioDiseases)
+
+head(riskFactors)
+
+cardioDiseases <- cardioDiseases %>%
+  pivot_wider(names_from = c(break_out_category, break_out),
+              values_from = percent_value)
+
+colSums(is.na(cardioDiseases))
+
+cardioDiseases <- select(cardioDiseases, -`Age_25-44`, -`Age_18-24`, -Race_Other, -`Race_Non-Hispanic Asian`) %>%
+  drop_na()
+
+unique(cardioDiseases$topic)
+  
+cardioDiseases.majorCardiovascularDisease <- filter(cardioDiseases, topic == "Major Cardiovascular Disease")
+cardioDiseases.heartAttack <- filter(cardioDiseases, topic == "Acute Myocardial Infarction (Heart Attack)")
+cardioDiseases.coronaryHeartDisease <- filter(cardioDiseases, topic == "Coronary Heart Disease")
+cardioDiseases.stroke <- filter(cardioDiseases, topic == "Stroke")
+
+riskFactors <- riskFactors %>%
+  pivot_wider(names_from = c(break_out_category, break_out),
+              values_from = percent_value,
+              values_fn = mean)
+
+colSums(is.na(riskFactors))
+
+riskFactors <- select(riskFactors, -Race_Other, -`Race_Non-Hispanic Asian`) %>%
+  drop_na()
+
+riskFactors.physicalInactivity <- filter(riskFactors, topic == "Physical Inactivity")
+riskFactors.smoking <- filter(riskFactors, topic == "Smoking")
+riskFactors.hypertension <- filter(riskFactors, topic == "Hypertension")
 ```
 
 I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn't find a nice way to tidy the data. I thought about splitting the data into multiple tables, but believe this would create many table and make working with the data more of a challenge. I will likely have to meet to figure out if it is possible to tidy.
@@ -99,28 +130,37 @@ knn.5 <- knn(train, test, train.def, k = 5)
 knn.7 <- knn(train, test, train.def, k = 7)
 knn.15 <- knn(train, test, train.def, k = 15)
 
-accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100} 
+get.accuracy <- function(x){sum(diag(x)/(sum(rowSums(x))))} 
 ## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
 
 tab.3 <- table(knn.3, test.def)
-tab.3
-accuracy(tab.3)
+confusionMatrix(tab.3)
+acc3 <- get.accuracy(tab.3)
 ## K = 3 correctly classifies 78.05% of the outcomes
 
 tab.5 <- table(knn.5, test.def)
-tab.5
-accuracy(tab.5)
+confusionMatrix(tab.5)
+acc5 <- get.accuracy(tab.5)
 ## K = 5 correctly classifies 73.66% of the outcomes
 
 tab.7 <- table(knn.7, test.def)
-tab.7
-accuracy(tab.7)
+confusionMatrix(tab.7)
+acc7 <- get.accuracy(tab.7)
 ## K = 7 correctly classifies 79.51% of the outcomes
 
 tab.15 <- table(knn.15, test.def)
-tab.15
-accuracy(tab.15)
+confusionMatrix(tab.15)
+acc15 <- get.accuracy(tab.15)
 ## K = 15 correctly classifies 80% of the outcomes
+
+k <- c(3, 5, 7, 15)
+Accuracy <- c(acc3, acc5, acc7, acc15)
+df <- data.frame(k, Accuracy)
+
+#Accuracy plot
+ggplot(df, aes(x=k, y=Accuracy)) +
+  geom_point() +
+  geom_line()
 ```
 
 Model Version 2:
@@ -143,28 +183,37 @@ knn.5 <- knn(train, test, train.def, k = 5)
 knn.7 <- knn(train, test, train.def, k = 7)
 knn.15 <- knn(train, test, train.def, k = 15)
 
-accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100} 
+get.accuracy <- function(x){sum(diag(x)/(sum(rowSums(x))))} 
 ## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
 
 tab.3 <- table(knn.3, test.def)
-tab.3
-accuracy(tab.3)
+confusionMatrix(tab.3)
+acc3 <- get.accuracy(tab.3)
 ## K = 3 correctly classifies 78.54% of the outcomes
 
 tab.5 <- table(knn.5, test.def)
-tab.5
-accuracy(tab.5)
+confusionMatrix(tab.5)
+acc5 <- get.accuracy(tab.5)
 ## K = 5 correctly classifies 77.56% of the outcomes
 
 tab.7 <- table(knn.7, test.def)
-tab.7
-accuracy(tab.7)
+confusionMatrix(tab.7)
+acc7 <- get.accuracy(tab.7)
 ## K = 7 correctly classifies 81.46% of the outcomes
 
 tab.15 <- table(knn.15, test.def)
-tab.15
-accuracy(tab.15)
+confusionMatrix(tab.15)
+acc15 <- get.accuracy(tab.15)
 ## K = 15 correctly classifies 80.98% of the outcomes
+
+k <- c(3, 5, 7, 15)
+Accuracy <- c(acc3, acc5, acc7, acc15)
+df <- data.frame(k, Accuracy)
+
+#Accuracy plot
+ggplot(df, aes(x=k, y=Accuracy)) +
+  geom_point() +
+  geom_line()
 ```
 
 ## Parameters and Output

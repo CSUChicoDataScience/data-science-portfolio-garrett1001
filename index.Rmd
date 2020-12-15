@@ -20,3 +20,9 @@ Data Exploration
 Model Planning and Model Building
 
 [Deliverable 2 Link](deliverable2.html)
+
+## Deliverable 3
+
+Revision and Improvement
+
+[Deliverable 3 Link](deliverable3.html)

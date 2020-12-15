@@ -20,17 +20,11 @@ I first found my data set on kaggle, but then found that its original source is 
 
 ```{r data}
 heart <- read.csv("heart.csv")
-
-heart$target[heart$target == 1] <- "Unhealthy" # For clarification
-heart$target[heart$target == 0] <- "Healthy"
-heart$sex[heart$sex == 1] <- "Male"
-heart$sex[heart$sex == 0] <- "Female"
-
 head(heart)
 ```
 
 * `age` - `integer` - the age of the patient in years.
-* `sex` - `character` - a categorical variable for the sex of the patient. (male; female)
+* `sex` - `integer` - a categorical variable for the sex of the patient. (1 = male; 0 = female)
 * `cp` - `integer` - a categorical variable for chest pain type. (1 = typical angina; 2 = atypical angina; 3 = non-anginal pain; 4 = asymptomatic)
   + Angina is a condition marked by severe pain in the chest, often also spreading to the shoulders, arms, and neck, caused by an inadequate blood supply to the heart.
   + ![Angina Type Table](angina.jpg)
@@ -55,7 +49,7 @@ head(heart)
   + Fluoroscopy is used to help the healthcare provider see the flow of blood through the coronary arteries to check for arterial blockages
 * `thal` - `integer` - thalassemia (3 = normal; 6 = fixed defect; 7 = reversible defect)
   + Thalassemia is an inherited blood disorder that causes your body to have less hemoglobin than normal. Hemoglobin enables red blood cells to carry oxygen. Thalassemia can cause anemia, leaving you fatigued
-* `target` - `character` - diagnosis of heart disease (healthy = no disease; unhealthy = disease)
+* `target` - `character` - diagnosis of heart disease (1 = healthy; 0 = unhealthy)
 
 ## Exploratory Data Analysis
 
@@ -66,6 +60,9 @@ summary(heart)
 ### Heathly vs Unheathy Heart
 
 ```{r eda0}
+heart$target[heart$target == 1] <- "Unhealthy" # For clarification
+heart$target[heart$target == 0] <- "Healthy"
+
 ggplot(aes(target, fill=target), data=heart) +
   geom_bar()+
   geom_text(aes(label=stat(count)), stat='count', vjust=1.6, color="white", size=3.5)

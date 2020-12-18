@@ -1,8 +1,10 @@
 ---
-title: "index"
+title: "Index"
 author: "Garrett Welton"
 date: "9/29/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -13,16 +15,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Data Exploration
 
-[Deliverable 1 Link](deliverable1.html)
+[Deliverable 1 Link](deliverable1.pdf)
 
 ## Deliverable 2
 
 Model Planning and Model Building
 
-[Deliverable 2 Link](deliverable2.html)
+[Deliverable 2 Link](deliverable2.pdf)
 
 ## Deliverable 3
 
 Revision, Improvement, and Validation
 
-[Deliverable 3 Link](deliverable3.html)
+[Deliverable 3 Link](deliverable3.pdf)

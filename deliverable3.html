@@ -398,21 +398,6 @@ cardioDiseases.coronaryHeartDisease &lt;- filter(cardioDiseases, topic == &quot;
 cardioDiseases.stroke &lt;- filter(cardioDiseases, topic == &quot;Stroke&quot;) %&gt;%
   select(-topic)
 
-riskFactors &lt;- filter(NHIS, category != &quot;Cardiovascular Diseases&quot;) %&gt;%
-  select(-category) %&gt;%
-  pivot_wider(names_from = c(break_out_category, break_out),
-              values_from = percent_value,
-              values_fn = mean) %&gt;%
-  select(-Race_Other, -`Race_Non-Hispanic Asian`) %&gt;%
-  drop_na()
-
-riskFactors.physicalInactivity &lt;- filter(riskFactors, topic == &quot;Physical Inactivity&quot;) %&gt;%
-  select(-topic)
-riskFactors.smoking &lt;- filter(riskFactors, topic == &quot;Smoking&quot;) %&gt;%
-  select(-topic)
-riskFactors.hypertension &lt;- filter(riskFactors, topic == &quot;Hypertension&quot;) %&gt;%
-  select(-topic)
-
 #Data Exploration
 ggplot(cardioDiseases.majorCardiovascularDisease, aes(x = year, y = Overall_Overall, color = location))+
   geom_point()+
@@ -452,84 +437,6 @@ head(Heart)</code></pre>
 ## # ... with 5 more variables: `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;,
 ## #   `Race_Non-Hispanic White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;,
 ## #   Race_Hispanic &lt;dbl&gt;</code></pre>
-<pre class="r"><code>head(cardioDiseases.heartAttack)</code></pre>
-<pre><code>## # A tibble: 6 x 12
-##    year location Overall_Overall Gender_Male Gender_Female `Age_45-64` `Age_65+`
-##   &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-## 1  2000 United ~             3.2         4.5           2.1         3.7      11.1
-## 2  2000 Northea~             2.8         4             1.8         3.4       9.4
-## 3  2000 South                3.9         5.7           2.3         4.7      13  
-## 4  2001 United ~             3.5         4.9           2.3         4.1      12.1
-## 5  2001 Northea~             3.3         4.8           2.1         3.3      12.8
-## 6  2001 South                3.4         4.9           2.3         4.2      11.7
-## # ... with 5 more variables: `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;,
-## #   `Race_Non-Hispanic White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;,
-## #   Race_Hispanic &lt;dbl&gt;</code></pre>
-<pre class="r"><code>head(cardioDiseases.coronaryHeartDisease)</code></pre>
-<pre><code>## # A tibble: 6 x 12
-##    year location Overall_Overall Gender_Male Gender_Female `Age_45-64` `Age_65+`
-##   &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-## 1  2000 United ~             3.5         4.8           2.5         4.1      12.6
-## 2  2000 Northea~             3.1         4.2           2.1         4        10  
-## 3  2000 South                3.9         5.2           2.9         4.5      14.3
-## 4  2001 United ~             4.1         5.6           2.9         5        14.1
-## 5  2001 Northea~             4.1         5.1           3.2         4.5      14.8
-## 6  2001 South                4.5         5.8           3.4         5.4      14.8
-## # ... with 5 more variables: `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;,
-## #   `Race_Non-Hispanic White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;,
-## #   Race_Hispanic &lt;dbl&gt;</code></pre>
-<pre class="r"><code>head(cardioDiseases.stroke)</code></pre>
-<pre><code>## # A tibble: 6 x 12
-##    year location Overall_Overall Gender_Male Gender_Female `Age_45-64` `Age_65+`
-##   &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-## 1  2000 United ~             2.2         2.3           2.1         2.1       8.3
-## 2  2000 Northea~             1.6         1.6           1.6         1.3       6.2
-## 3  2000 South                2.6         2.7           2.5         2.6       9.6
-## 4  2000 West                 2.2         2.3           2.2         2.2       8.2
-## 5  2001 United ~             2.4         2.5           2.4         2.3       9  
-## 6  2001 Northea~             1.9         1.8           1.9         1.4       7.8
-## # ... with 5 more variables: `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;,
-## #   `Race_Non-Hispanic White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;,
-## #   Race_Hispanic &lt;dbl&gt;</code></pre>
-<pre class="r"><code>head(riskFactors.physicalInactivity)</code></pre>
-<pre><code>## # A tibble: 6 x 14
-##    year location Overall_Overall Gender_Male Gender_Female `Age_18-24`
-##   &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;
-## 1  2000 United ~            37.8        35            40.3        29.4
-## 2  2000 Northea~            34.6        31.1          37.6        28.7
-## 3  2000 Midwest             35.1        33.1          36.9        23.4
-## 4  2000 South               43.7        41.1          46          35.7
-## 5  2000 West                33.6        30.2          36.9        26.7
-## 6  2001 United ~            36.4        33.4          39.2        26.5
-## # ... with 8 more variables: `Age_25-44` &lt;dbl&gt;, `Age_45-64` &lt;dbl&gt;,
-## #   `Age_65+` &lt;dbl&gt;, `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;, `Race_Non-Hispanic
-## #   White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;, Race_Hispanic &lt;dbl&gt;</code></pre>
-<pre class="r"><code>head(riskFactors.smoking)</code></pre>
-<pre><code>## # A tibble: 6 x 14
-##    year location Overall_Overall Gender_Male Gender_Female `Age_18-24`
-##   &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;
-## 1  2000 United ~            23.2        25.3          21.1        26.8
-## 2  2000 Northea~            21.7        22.7          20.9        27.7
-## 3  2000 Midwest             25.3        27.1          23.6        31.4
-## 4  2000 South               24.4        27.3          21.8        26.7
-## 5  2000 West                19.3        22.1          16.6        19.7
-## 6  2001 United ~            22.7        24.8          20.8        26.9
-## # ... with 8 more variables: `Age_25-44` &lt;dbl&gt;, `Age_45-64` &lt;dbl&gt;,
-## #   `Age_65+` &lt;dbl&gt;, `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;, `Race_Non-Hispanic
-## #   White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;, Race_Hispanic &lt;dbl&gt;</code></pre>
-<pre class="r"><code>head(riskFactors.hypertension)</code></pre>
-<pre><code>## # A tibble: 6 x 14
-##    year location Overall_Overall Gender_Male Gender_Female `Age_18-24`
-##   &lt;int&gt; &lt;chr&gt;              &lt;dbl&gt;       &lt;dbl&gt;         &lt;dbl&gt;       &lt;dbl&gt;
-## 1  2003 United ~            91.2        88.5          93.7        86.1
-## 2  2003 Northea~            93.1        91            95.0        90.4
-## 3  2003 Midwest             92.6        90.1          95          88.8
-## 4  2003 South               91.2        88.9          93.4        86.2
-## 5  2003 West                87.7        83.7          91.6        78.6
-## 6  2008 United ~            93.7        91.4          95.8        92.6
-## # ... with 8 more variables: `Age_25-44` &lt;dbl&gt;, `Age_45-64` &lt;dbl&gt;,
-## #   `Age_65+` &lt;dbl&gt;, `Age_35+` &lt;dbl&gt;, `Age_75+` &lt;dbl&gt;, `Race_Non-Hispanic
-## #   White` &lt;dbl&gt;, `Race_Non-Hispanic Black` &lt;dbl&gt;, Race_Hispanic &lt;dbl&gt;</code></pre>
 </div>
 <div id="validation" class="section level2">
 <h2>Validation</h2>

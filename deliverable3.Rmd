@@ -44,21 +44,6 @@ cardioDiseases.coronaryHeartDisease <- filter(cardioDiseases, topic == "Coronary
 cardioDiseases.stroke <- filter(cardioDiseases, topic == "Stroke") %>%
   select(-topic)
 
-riskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
-  select(-category) %>%
-  pivot_wider(names_from = c(break_out_category, break_out),
-              values_from = percent_value,
-              values_fn = mean) %>%
-  select(-Race_Other, -`Race_Non-Hispanic Asian`) %>%
-  drop_na()
-
-riskFactors.physicalInactivity <- filter(riskFactors, topic == "Physical Inactivity") %>%
-  select(-topic)
-riskFactors.smoking <- filter(riskFactors, topic == "Smoking") %>%
-  select(-topic)
-riskFactors.hypertension <- filter(riskFactors, topic == "Hypertension") %>%
-  select(-topic)
-
 #Data Exploration
 ggplot(cardioDiseases.majorCardiovascularDisease, aes(x = year, y = Overall_Overall, color = location))+
   geom_point()+
@@ -72,15 +57,7 @@ This graph is a breakdown of the percent of the population of different regions 
 ```{r}
 Heart <- read.csv("heart.csv")
 head(Heart)
-
 head(cardioDiseases.majorCardiovascularDisease)
-head(cardioDiseases.heartAttack)
-head(cardioDiseases.coronaryHeartDisease)
-head(cardioDiseases.stroke)
-
-head(riskFactors.physicalInactivity)
-head(riskFactors.smoking)
-head(riskFactors.hypertension)
 ```
 
 ## Validation

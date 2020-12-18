@@ -20,7 +20,7 @@ Based upon my initial discovery and exploration I would like to predict the pres
 
 ## "Success" and "Failure"
 
-For the predictions I am trying to make "Success" would be creating a model that accurately predicts the target variable or the presence of heart disease in a patient with more than 70%. "Failure" would be if my model was unable to accurately predict this.
+For the predictions I am trying to make "Success" would be creating a model that accurately predicts the target variable or the presence of heart disease in a patient with more than 71%. "Failure" would be if my model was unable to accurately predict this.
 
 ## New Data
 

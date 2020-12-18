@@ -94,6 +94,7 @@ The distribution of resting blood pressure of patients with healthy vs unhealthy
 ggplot(aes(thalach, fill=target), data=heart) +
   geom_density(alpha = .7)
 ```
+
 When looking at the distribution of maximum heart rate achieved by patients with healthy vs unhealthy hearts we can see that patients with unhealthy hearts are more likely to achieve higher maximum heart rates. Unhealthy patients distribution is more left skewed with the majority concentrated on the high end, while healthy patients have a more normal distribution. Maximum heart rate achieved may be a useful factor when predicting heart disease.
 
 

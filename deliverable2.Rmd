@@ -27,10 +27,11 @@ For the predictions I am trying to make "Success" would be creating a model that
 My additional dataset is the "National Health Interview Survey (NHIS) - National Cardiovascular Disease Surveillance Data" published by the Centers for Disease Control and Prevention. The NHIS monitors the health of the nation through personal household interviews. This dataset is provided by the National Cardiovascular Disease Surveillance System, which is designed to integrate multiple indicators from many data sources to provide a comprehensive picture of the public health burden of CVDs and associated risk factors in the United States. This data is from 2001 and forward. This dataset should be useful for determining how different regions of the US affect the rate of cardiovascular disease within its different populations, as well as how different risk factors play into these rates. This new data will help me help me be able to make new and better predictions.
 
 ```{r}
+#API call
 df <- read.socrata(
   "https://chronicdata.cdc.gov/resource/fwns-azgu.csv",
   app_token = "OJxxBUd1kEfoUDA5ACIVnD88u"
-) # API call
+)
 ```
 
 Tidying Data:
@@ -124,8 +125,8 @@ heart <- as_tibble(Heart) %>%
 
 set.seed(131)
 
+#Split training and test dataset
 train_rows <- as.vector(createDataPartition(Heart$target, p = 0.8, list = FALSE))
-## Split training and test dataset
 
 train <- heart[train_rows, ]
 test <- heart[-train_rows, ]
@@ -137,28 +138,28 @@ knn.5 <- knn(train, test, train.def, k = 5)
 knn.7 <- knn(train, test, train.def, k = 7)
 knn.15 <- knn(train, test, train.def, k = 15)
 
+#function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
 get.accuracy <- function(x){sum(diag(x)/(sum(rowSums(x))))} 
-## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
 
 tab.3 <- table(knn.3, test.def)
 confusionMatrix(tab.3)
 acc3 <- get.accuracy(tab.3)
-## K = 3 correctly classifies 78.05% of the outcomes
+#K = 3 correctly classifies 78.05% of the outcomes
 
 tab.5 <- table(knn.5, test.def)
 confusionMatrix(tab.5)
 acc5 <- get.accuracy(tab.5)
-## K = 5 correctly classifies 73.66% of the outcomes
+#K = 5 correctly classifies 73.66% of the outcomes
 
 tab.7 <- table(knn.7, test.def)
 confusionMatrix(tab.7)
 acc7 <- get.accuracy(tab.7)
-## K = 7 correctly classifies 79.51% of the outcomes
+#K = 7 correctly classifies 79.51% of the outcomes
 
 tab.15 <- table(knn.15, test.def)
 confusionMatrix(tab.15)
 acc15 <- get.accuracy(tab.15)
-## K = 15 correctly classifies 80% of the outcomes
+#K = 15 correctly classifies 80% of the outcomes
 
 k <- c(3, 5, 7, 15)
 Accuracy <- c(acc3, acc5, acc7, acc15)
@@ -177,8 +178,8 @@ heart <- as_tibble(Heart) %>%
 
 set.seed(131)
 
+#Split training and test dataset
 train_rows <- as.vector(createDataPartition(Heart$target, p = 0.8, list = FALSE))
-## Split training and test dataset
 
 train <- heart[train_rows, ]
 test <- heart[-train_rows, ]
@@ -190,28 +191,28 @@ knn.5 <- knn(train, test, train.def, k = 5)
 knn.7 <- knn(train, test, train.def, k = 7)
 knn.15 <- knn(train, test, train.def, k = 15)
 
+#function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
 get.accuracy <- function(x){sum(diag(x)/(sum(rowSums(x))))} 
-## function that divides the correct predictions by total number of predictions that tell us how accurate the model is.
 
 tab.3 <- table(knn.3, test.def)
 confusionMatrix(tab.3)
 acc3 <- get.accuracy(tab.3)
-## K = 3 correctly classifies 78.54% of the outcomes
+#K = 3 correctly classifies 78.54% of the outcomes
 
 tab.5 <- table(knn.5, test.def)
 confusionMatrix(tab.5)
 acc5 <- get.accuracy(tab.5)
-## K = 5 correctly classifies 77.56% of the outcomes
+#K = 5 correctly classifies 77.56% of the outcomes
 
 tab.7 <- table(knn.7, test.def)
 confusionMatrix(tab.7)
 acc7 <- get.accuracy(tab.7)
-## K = 7 correctly classifies 81.46% of the outcomes
+#K = 7 correctly classifies 81.46% of the outcomes
 
 tab.15 <- table(knn.15, test.def)
 confusionMatrix(tab.15)
 acc15 <- get.accuracy(tab.15)
-## K = 15 correctly classifies 80.98% of the outcomes
+#K = 15 correctly classifies 80.98% of the outcomes
 
 k <- c(3, 5, 7, 15)
 Accuracy <- c(acc3, acc5, acc7, acc15)

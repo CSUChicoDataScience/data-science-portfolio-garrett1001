@@ -23,6 +23,6 @@ Model Planning and Model Building
 
 ## Deliverable 3
 
-Revision and Improvement
+Revision, Improvement, and Validation
 
 [Deliverable 3 Link](deliverable3.html)

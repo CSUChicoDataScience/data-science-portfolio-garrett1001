@@ -11,6 +11,7 @@ library(RSocrata)
 library(caret)
 library(ggplot2) 
 library(tidyverse)
+library(class)
 ```
 
 ## Improvement
@@ -34,10 +35,14 @@ cardioDiseases <- filter(NHIS, category == "Cardiovascular Diseases") %>%
   select(-`Age_25-44`, -`Age_18-24`, -Race_Other, -`Race_Non-Hispanic Asian`) %>%
   drop_na()
   
-cardioDiseases.majorCardiovascularDisease <- filter(cardioDiseases, topic == "Major Cardiovascular Disease")
-cardioDiseases.heartAttack <- filter(cardioDiseases, topic == "Acute Myocardial Infarction (Heart Attack)")
-cardioDiseases.coronaryHeartDisease <- filter(cardioDiseases, topic == "Coronary Heart Disease")
-cardioDiseases.stroke <- filter(cardioDiseases, topic == "Stroke")
+cardioDiseases.majorCardiovascularDisease <- filter(cardioDiseases, topic == "Major Cardiovascular Disease") %>%
+  select(-topic)
+cardioDiseases.heartAttack <- filter(cardioDiseases, topic == "Acute Myocardial Infarction (Heart Attack)") %>%
+  select(-topic)
+cardioDiseases.coronaryHeartDisease <- filter(cardioDiseases, topic == "Coronary Heart Disease") %>%
+  select(-topic)
+cardioDiseases.stroke <- filter(cardioDiseases, topic == "Stroke") %>%
+  select(-topic)
 
 riskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
   select(-category) %>%
@@ -47,9 +52,12 @@ riskFactors <- filter(NHIS, category != "Cardiovascular Diseases") %>%
   select(-Race_Other, -`Race_Non-Hispanic Asian`) %>%
   drop_na()
 
-riskFactors.physicalInactivity <- filter(riskFactors, topic == "Physical Inactivity")
-riskFactors.smoking <- filter(riskFactors, topic == "Smoking")
-riskFactors.hypertension <- filter(riskFactors, topic == "Hypertension")
+riskFactors.physicalInactivity <- filter(riskFactors, topic == "Physical Inactivity") %>%
+  select(-topic)
+riskFactors.smoking <- filter(riskFactors, topic == "Smoking") %>%
+  select(-topic)
+riskFactors.hypertension <- filter(riskFactors, topic == "Hypertension") %>%
+  select(-topic)
 
 #Data Exploration
 ggplot(cardioDiseases.majorCardiovascularDisease, aes(x = year, y = Overall_Overall, color = location))+
@@ -85,6 +93,15 @@ heart$target = as.factor(heart$target)
 
 set.seed(132)
 
+#Split training and test dataset
+train_rows <- as.vector(createDataPartition(heart$target, p = 0.8, list = FALSE))
+
+train <- heart[train_rows, ]
+test <- heart[-train_rows, ]
+
+train.def <- Heart[train_rows, 14]
+test.def <- Heart[-train_rows, 14]
+
 trControl <- trainControl(method  = "cv",
                           number  = 5)
 
@@ -92,17 +109,22 @@ fit <- train(target ~ .,
              method     = "knn",
              tuneGrid   = expand.grid(k = 3:15),
              trControl  = trControl,
-             data       = heart)
-
+             data       = train)
 fit
 
 #Accuracy plot
 ggplot(fit$results, aes(x=k, y=Accuracy)) +
   geom_point() +
   geom_line()
+
+#Apply model
+knn.7 <- knn(train, test, train.def, k = 7)
+
+tab.7 <- table(knn.7, test.def)
+confusionMatrix(tab.7)
 ```
 
-This knn model has an accuracy of about 79%, which is over 70%, making it a successful model according to my definition of "Success" and "Failure". It is fairly accurate at predicting the presence of heart disease in patients baised on thier records.
+There is not much of difference between the accuracy of our validation set and test set, suggesting that our model is not over fitting the data. This knn model has an accuracy of about 77% on the test set, which is over 70%, making it a successful model according to my definition of "Success" and "Failure". It is fairly accurate at predicting the presence of heart disease in patients based on their records.
 
 ## Implications
 

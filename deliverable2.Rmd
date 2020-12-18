@@ -65,10 +65,14 @@ cardioDiseases <- select(cardioDiseases, -`Age_25-44`, -`Age_18-24`, -Race_Other
 
 unique(cardioDiseases$topic)
   
-cardioDiseases.majorCardiovascularDisease <- filter(cardioDiseases, topic == "Major Cardiovascular Disease")
-cardioDiseases.heartAttack <- filter(cardioDiseases, topic == "Acute Myocardial Infarction (Heart Attack)")
-cardioDiseases.coronaryHeartDisease <- filter(cardioDiseases, topic == "Coronary Heart Disease")
-cardioDiseases.stroke <- filter(cardioDiseases, topic == "Stroke")
+cardioDiseases.majorCardiovascularDisease <- filter(cardioDiseases, topic == "Major Cardiovascular Disease") %>%
+  select(-topic)
+cardioDiseases.heartAttack <- filter(cardioDiseases, topic == "Acute Myocardial Infarction (Heart Attack)") %>%
+  select(-topic)
+cardioDiseases.coronaryHeartDisease <- filter(cardioDiseases, topic == "Coronary Heart Disease") %>%
+  select(-topic)
+cardioDiseases.stroke <- filter(cardioDiseases, topic == "Stroke") %>%
+  select(-topic)
 
 riskFactors <- riskFactors %>%
   pivot_wider(names_from = c(break_out_category, break_out),
@@ -80,12 +84,15 @@ colSums(is.na(riskFactors))
 riskFactors <- select(riskFactors, -Race_Other, -`Race_Non-Hispanic Asian`) %>%
   drop_na()
 
-riskFactors.physicalInactivity <- filter(riskFactors, topic == "Physical Inactivity")
-riskFactors.smoking <- filter(riskFactors, topic == "Smoking")
-riskFactors.hypertension <- filter(riskFactors, topic == "Hypertension")
+riskFactors.physicalInactivity <- filter(riskFactors, topic == "Physical Inactivity") %>%
+  select(-topic)
+riskFactors.smoking <- filter(riskFactors, topic == "Smoking") %>%
+  select(-topic)
+riskFactors.hypertension <- filter(riskFactors, topic == "Hypertension") %>%
+  select(-topic)
 ```
 
-I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn't find a nice way to tidy the data. I thought about splitting the data into multiple tables, but believe this would create many table and make working with the data more of a challenge. I will likely have to meet to figure out if it is possible to tidy.
+I tried multiple methods to tidy my new data, however, the structure of the data seems to be a standard of the CDC and proved to be a challenge. Most of the publicly available datasets I found on cardiovascular disease were published by the CDC and shared this same format. The data contains many nested variable within its column variables, making it not tidy. The challenge is that most of the variable within these column are dependent on variables that are stored with other columns. Due to this I couldn't find a nice way to tidy the data. I tried splitting the data into multiple tables, but believe this can make working with the data more of a challenge.
 
 ## Tables
 
